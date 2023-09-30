@@ -22,16 +22,25 @@ export const useCookieConsent = () => {
       if (!hasSeenBanner) {
         const cookieBanner = document.createElement('div');
         // Add styles to the cookieBanner if needed
+        cookieBanner.style.position = 'fixed';  // or 'absolute' or 'relative' based on your need
+        cookieBanner.style.bottom = '60px';  // Adjust the position so it doesn't overlap with footer
+        cookieBanner.style.left = '0';
+        cookieBanner.style.zIndex = '10000';  // High z-index to make it appear on top
+        cookieBanner.style.width = '100%';
+        cookieBanner.style.backgroundColor = '#333';
+        cookieBanner.style.color = 'white';
+        cookieBanner.style.textAlign = 'center';
         cookieBanner.innerHTML = 'We use cookies to improve your experience. <button id="acceptCookies">Accept</button> <button id="rejectCookies">Reject</button>';
+
         document.body.appendChild(cookieBanner);
 
         document.getElementById('acceptCookies').addEventListener('click', function () {
-          setCookie('consent', 'true', 365);
+          setCookie('consent', 'true', 3);
           cookieBanner.remove();
         });
 
         document.getElementById('rejectCookies').addEventListener('click', function () {
-          setCookie('consent', 'false', 365);
+          setCookie('consent', 'false', 3);
           cookieBanner.remove();
         });
 

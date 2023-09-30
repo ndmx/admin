@@ -1,53 +1,59 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../firebase';
+import { collection, getDocs } from 'firebase/firestore';
+import { format } from 'date-fns';
 
-const Mail = () => {
+const Mail = ({ activeTab, setActiveTab }) => {
   const [contactForms, setContactForms] = useState([]);
   const [joinForms, setJoinForms] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch data from contactForms collection
-        console.log('DB Object:', db);
-        const contactSnapshot = await db.collection('contactForms').get();
-        const contactData = contactSnapshot.docs.map((doc) => doc.data());
+        // Fetch all documents from contactForms collection
+        const contactSnapshot = await getDocs(collection(db, 'contactForms'));
+        const contactData = contactSnapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
         setContactForms(contactData);
 
-        // Fetch data from joinForms collection
-        const joinSnapshot = await db.collection('joinForms').get();
-        const joinData = joinSnapshot.docs.map((doc) => doc.data());
+        // Fetch all documents from joinForms collection
+        const joinSnapshot = await getDocs(collection(db, 'joinForms'));
+        const joinData = joinSnapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
         setJoinForms(joinData);
       } catch (error) {
-        console.log('Error fetching data:', error);  // Log the entire error object
+        console.log('Error fetching data:', error);
       }
     };
-    
     fetchData();
   }, []);
 
   return (
     <div>
-      <h1>Contact Forms</h1>
-      <ul>
-        {Array.isArray(contactForms) && contactForms.map((form, index) => (
-          <li key={index}>
-            Name: {form.name} <br />
-            Email: {form.email} <br />
-            Message: {form.message}
-          </li>
-        ))}
-      </ul>
+      {activeTab === 'contact' && (
+        <div className="mailbox">
+          <ul>
+            {contactForms.map((form, index) => (
+              <li key={index}>
+                Name: {form.name} --|-- {form.timestamp ? format(form.timestamp.toDate(), 'h aaaa, MMM d yyyy') : 'N/A'}<br />
+                Email: {form.email}  <br />
+                Message: {form.message}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-      <h1>Join Forms</h1>
-      <ul>
-        {Array.isArray(joinForms) && joinForms.map((form, index) => (
-          <li key={index}>
-            Name: {form.name} <br />
-            Email: {form.email}
-          </li>
-        ))}
-      </ul>
+      {activeTab === 'join' && (
+        <div className="mailbox">
+          <ul>
+            {joinForms.map((form, index) => (
+              <li key={index}>
+                Name: {form.name} --|-- time: {form.timestamp ? format(form.timestamp.toDate(), 'h aaaa, MMM d yyyy') : 'N/A'}<br />
+                Email: {form.email}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

@@ -4,10 +4,9 @@ import Login from './pages/Login';
 import Header from './pages/Header';
 import Home from './pages/Home';
 import Footer from './pages/Footer';
-import { useCookieConsent } from './utils/cookies';
 
 function App() {
-  useCookieConsent();
+  
   const [loggedIn, setLoggedIn] = useState(false);
   const [routeKey, setRouteKey] = useState(0);
   const [userId, setUserId] = useState(null); // Use null instead of 'null'
@@ -18,16 +17,25 @@ function App() {
   };
 
   const handleLogout = () => {
+    // Remove userId from localStorage during logout
+    localStorage.removeItem('userId');
     setLoggedIn(false);
     setUserId(null);
     setRouteKey((prevKey) => prevKey + 1);
   };
 
   useEffect(() => {
+    // Check if a userId exists in localStorage
+    const storedUserId = localStorage.getItem('userId');
+    if (storedUserId) {
+      setLoggedIn(true);
+      setUserId(storedUserId);
+    }
+  }, []);
+
+  useEffect(() => {
     console.log('User ID:', userId);
   }, [userId]);
-
-  // Removed the useEffect for setting routeKey to 0
 
   return (
     <Router>
