@@ -22,7 +22,6 @@ const Login = (props) => {
         throw new Error("Invalid username or password");
       }
 
-      const user = querySnapshot.docs[0].data();
       const userId = querySnapshot.docs[0].id;
 
       // Storing userId in localStorage if "Remember Me" is checked
