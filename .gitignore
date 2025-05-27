@@ -6,6 +6,11 @@ node_modules/
 build/
 /dist
 
+.env
+build/
+*.log
+.DS_Store
+
 # Environment variables
 .env
 .env.local
