@@ -8,9 +8,20 @@ const Login = (props) => {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [validationErrors, setValidationErrors] = useState({});
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!username.trim()) newErrors.username = "Username is required";
+    if (!password.trim()) newErrors.password = "Password is required";
+    setValidationErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleLogin = async (event) => {
     event.preventDefault();
+    if (!validateForm()) return;
+
     setIsLoading(true);
     setError("");
 
@@ -34,6 +45,7 @@ const Login = (props) => {
       setUsername("");
       setPassword("");
       setRememberMe(false);
+      setValidationErrors({});
     } catch (error) {
       setError(error.message);
     } finally {
@@ -57,6 +69,7 @@ const Login = (props) => {
                 onChange={(e) => setUsername(e.target.value)}
                 required
               />
+              {validationErrors.username && <div className="error">{validationErrors.username}</div>}
             </div>
             <div className="txtb">
               <input
@@ -68,9 +81,9 @@ const Login = (props) => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+              {validationErrors.password && <div className="error">{validationErrors.password}</div>}
             </div>
             <div className="input-container">
-              <label htmlFor="remember-me">Remember Me</label>
               <input
                 type="checkbox"
                 id="remember-me"
@@ -78,6 +91,7 @@ const Login = (props) => {
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
               />
+              <label htmlFor="remember-me">Remember Me</label>
             </div>
             <div className="input-container">
               <button type="submit" disabled={isLoading}>

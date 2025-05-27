@@ -7,11 +7,12 @@ import { doc, getDoc } from "firebase/firestore";
 import { Timestamp } from 'firebase/firestore';
 import { format } from 'date-fns';
 
-
 const Home = ({ userId }) => {
   useCookieConsent();
 
   const [user, setUser] = useState(null);
+  const [theme, setTheme] = useState('light');
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,6 +33,10 @@ const Home = ({ userId }) => {
   const [newMessage, setNewMessage] = useState("");
   const [receiverId, setReceiverId] = useState("");
 
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  };
+
   const handleSendMessage = async () => {
     if (!user) return;
 
@@ -39,7 +44,7 @@ const Home = ({ userId }) => {
       fromName: user.username,
       fromEmail: user.email,
       message: newMessage,
-      timestamp: Timestamp.fromDate(new Date()),  // Firestore's Timestamp
+      timestamp: Timestamp.fromDate(new Date()),
     };
 
     if (await sendMessage(userId, receiverId, messageObj)) {
@@ -59,8 +64,14 @@ const Home = ({ userId }) => {
     return utcTime;
   };
 
+  const filteredMailbox = user?.mailbox?.filter(email =>
+    email.fromName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    email.fromEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    email.message.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
   return (
-    <div id="homePage">
+    <div id="homePage" data-theme={theme}>
       <div className="homepage-container">
         <div className="left-section">
           <div className="user-info">
@@ -97,20 +108,29 @@ const Home = ({ userId }) => {
           </div>
           <Mail activeTab={activeTab} setActiveTab={setActiveTab} />
           {activeTab === "third" && user && (
-            <div className="mailbox">
-              <ul>
-                {user.mailbox && user.mailbox.length > 0 ? (
-                  user.mailbox.map((email, index) => (
-                    <li key={index}>
-                      From: {email.fromName} --|-- {email.timestamp ? format(new Date(email.timestamp), 'h:mm a, MMM d yyyy') : 'N/A'}<br />
-                      Email: {email.fromEmail} <br />
-                      Message: {email.message}
-                    </li>
-                  ))
-                ) : (
-                  <li>No emails in the mailbox.</li>
-                )}
-              </ul>
+            <div>
+              <input
+                type="text"
+                placeholder="Search mailbox..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full p-3 mb-4 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]"
+              />
+              <div className="mailbox">
+                <ul>
+                  {filteredMailbox.length > 0 ? (
+                    filteredMailbox.map((email, index) => (
+                      <li key={index}>
+                        From: {email.fromName} --|-- {email.timestamp ? format(new Date(email.timestamp), 'h:mm a, MMM d yyyy') : 'N/A'}<br />
+                        Email: {email.fromEmail} <br />
+                        Message: {email.message}
+                      </li>
+                    ))
+                  ) : (
+                    <li>{searchTerm ? "No matching emails found." : "No emails in the mailbox."}</li>
+                  )}
+                </ul>
+              </div>
             </div>
           )}
         </div>
